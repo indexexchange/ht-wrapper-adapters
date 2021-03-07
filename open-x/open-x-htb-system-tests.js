@@ -9,7 +9,7 @@ function getStatsId() {
 }
 
 function getCallbackType() {
-    return 'NAME';
+    return 'NONE';
 }
 
 function getArchitecture() {
@@ -43,7 +43,7 @@ function validateBidRequest(request) {
     // Check query string parameters.
     expect(request.query.auid).toBe('54321,12345');
     expect(request.query.aus).toBe('300x250,300x600|300x600');
-    expect(request.query.bc).toBe('hb_ix_2.1.3');
+    expect(request.query.bc).toBe('hb_ix_2.1.4');
     expect(request.query.be).toBe('1');
 }
 
@@ -78,7 +78,7 @@ function getValidResponse(request, creative) {
         }
     };
 
-    return request.query.callback + '(' + JSON.stringify(response) + ')';
+    return JSON.stringify(response);
 }
 
 function validateTargeting(targetingMap) {
@@ -88,14 +88,14 @@ function validateTargeting(targetingMap) {
     }));
 }
 
-function getPassResponse(request) {
+function getPassResponse() {
     var response = {
         ads: {
             ad: []
         }
     };
 
-    return request.query.callback + '(' + JSON.stringify(response) + ')';
+    return JSON.stringify(response);
 }
 
 function getValidResponseWithDeal(request, creative) {
@@ -131,7 +131,7 @@ function getValidResponseWithDeal(request, creative) {
         }
     };
 
-    return request.query.callback + '(' + JSON.stringify(response) + ')';
+    return JSON.stringify(response);
 }
 
 function validateTargetingWithDeal(targetingMap) {

@@ -47,6 +47,14 @@ var Scribe = require('scribe.js');
  * @class
  */
 function OpenXHtb(configs) {
+    if (!Network.isXhrSupported()) {
+        //? if (DEBUG) {
+        Scribe.warn('Partner OpenXHtb requires AJAX support. Aborting instantiation.');
+        //? }
+
+        return null;
+    }
+
     /* =====================================
      * Data
      * ---------------------------------- */
@@ -96,6 +104,54 @@ function OpenXHtb(configs) {
         }
     }
 
+    function _getIDWithRTI(identity, identityName, expectedRtiPartner) {
+        if (!identity) {
+            return null;
+        }
+
+        if (!identity[identityName]) {
+            return null;
+        }
+        var id = null;
+        var uids = identity[identityName].data && identity[identityName].data.uids;
+        if (Utilities.isArray(uids)) {
+            for (var j = 0; j < uids.length; j++) {
+                if (uids[j].ext && uids[j].ext.rtiPartner === expectedRtiPartner) {
+                    id = uids[j].id;
+
+                    break;
+                }
+            }
+        }
+
+        return id;
+    }
+
+    function _getMerkleId(identity) {
+        if (!identity) {
+            return null;
+        }
+
+        if (!identity.MerkleIp) {
+            return null;
+        }
+        var merkle = {};
+        var uids = identity.MerkleIp.data && identity.MerkleIp.data.uids;
+        if (Utilities.isArray(uids)) {
+            for (var j = 0; j < uids.length; j++) {
+                if (uids[j].ext && uids[j].ext.enc === 0) {
+                    merkle.pp = uids[j].id;
+                }
+
+                if (uids[j].ext && uids[j].ext.enc === 1) {
+                    merkle.pam = uids[j].id;
+                }
+            }
+        }
+
+        return merkle;
+    }
+
     /**
      * Generates the request URL and query data to the endpoint for the xSlots
      * in the given returnParcels.
@@ -105,8 +161,6 @@ function OpenXHtb(configs) {
      * @return {object}
      */
     function __generateRequestObj(returnParcels) {
-        var callbackId = '_' + System.generateUniqueId();
-
         var auidString = '';
         var ausString = '';
 
@@ -120,8 +174,6 @@ function OpenXHtb(configs) {
         var uspConsent = ComplianceService.usp && ComplianceService.usp.getConsent();
         var privacyEnabled = ComplianceService.isPrivacyEnabled();
 
-        var tradeDeskId = null;
-
         for (var i = 0; i < returnParcels.length; i++) {
             auidString += returnParcels[i].xSlotRef.adUnitId.toString() + ',';
             ausString += Size.arrayToString(returnParcels[i].xSlotRef.sizes, ',') + '|';
@@ -132,18 +184,10 @@ function OpenXHtb(configs) {
 
         var identityData = returnParcels[0] && returnParcels[0].identityData;
 
-        if (identityData && identityData.AdserverOrgIp && identityData.AdserverOrgIp.data) {
-            var adsrvrUids = identityData.AdserverOrgIp.data.uids;
-            if (Utilities.isArray(adsrvrUids)) {
-                for (var j = 0; j < adsrvrUids.length; j++) {
-                    if (adsrvrUids[j].ext && adsrvrUids[j].ext.rtiPartner === 'TDID') {
-                        tradeDeskId = adsrvrUids[j].id;
-
-                        break;
-                    }
-                }
-            }
-        }
+        var tradeDeskId = _getIDWithRTI(identityData, 'AdserverOrgIp', 'TDID');
+        var liveIntentId = _getIDWithRTI(identityData, 'LiveIntentIp', 'LDID');
+        var liveRampId = _getIDWithRTI(identityData, 'LiveRampIp', 'idl');
+        var merkleId = _getMerkleId(identityData);
 
         var queryObj = {
             auid: auidString,
@@ -157,9 +201,24 @@ function OpenXHtb(configs) {
             res: Size.arrayToString([[Browser.getScreenWidth(), Browser.getScreenHeight()]]),
             tws: Size.arrayToString([[Browser.getViewportWidth(), Browser.getViewportHeight()]]),
             ifr: Browser.isTopFrame() ? 0 : 1,
-            callback: 'window.' + SpaceCamp.NAMESPACE + '.OpenXHtb.adResponseCallbacks.' + callbackId,
             cache: System.now()
         };
+
+        if (liveIntentId) {
+            queryObj.lipbid = liveIntentId;
+        }
+
+        if (liveRampId) {
+            queryObj.lre = liveRampId;
+        }
+
+        if (merkleId && merkleId.pam) {
+            queryObj.merkidpam = merkleId.pam;
+        }
+
+        if (merkleId && merkleId.pp) {
+            queryObj.merkidpp = merkleId.pp;
+        }
 
         if (tradeDeskId) {
             queryObj.ttduuid = tradeDeskId;
@@ -182,7 +241,7 @@ function OpenXHtb(configs) {
         return {
             url: __baseAdRequestUrl,
             data: queryObj,
-            callbackId: callbackId
+            callbackId: System.generateUniqueId()
         };
     }
 
@@ -202,6 +261,7 @@ function OpenXHtb(configs) {
        *  consentString: string
        *  }}
        */
+
         var gdprConsent = ComplianceService.gdpr.getConsent();
         var gdprPrivacyEnabled = ComplianceService.isPrivacyEnabled();
 
@@ -345,6 +405,7 @@ function OpenXHtb(configs) {
 
             curReturnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + targetingCpm];
             curReturnParcel.targeting[__baseClass._configs.targetingKeys.id] = [curReturnParcel.requestId];
+
             //? }
 
             //? if (FEATURES.RETURN_CREATIVE) {
@@ -391,7 +452,7 @@ function OpenXHtb(configs) {
             partnerId: 'OpenXHtb',
             namespace: 'OpenXHtb',
             statsId: 'OPNX',
-            version: '2.1.3',
+            version: '2.1.4',
             targetingType: 'slot',
             enabledAnalytics: {
                 requestTime: true
@@ -413,9 +474,9 @@ function OpenXHtb(configs) {
             },
             bidUnitInCents: 0.1,
             lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
-            callbackType: Partner.CallbackTypes.CALLBACK_NAME,
+            callbackType: Partner.CallbackTypes.NONE,
             architecture: Partner.Architectures.SRA,
-            requestType: Partner.RequestTypes.ANY,
+            requestType: Partner.RequestTypes.AJAX,
             parseAfterTimeout: true
         };
 
