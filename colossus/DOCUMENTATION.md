@@ -49,6 +49,7 @@ USD
 | deviceHeight | Yes | Int | User device height |
 | deviceWidth | Yes | Int | User device width |
 | wrapper | Yes | String | wrapper name |
+| eids | No | []identityData.SOURCE.data{} | Array of objects containing datafrom liveramp and ttd
  
 ### Example
 ```javascript
@@ -99,12 +100,19 @@ USD
 ### Configuration Keys
 | Key | Required | Type | Description |
 |---|---|---|---|
-| placementId | Yes | String | Collossus placemnt id |
+| placementId | Yes | Number | Collossus placemnt id |
 | sizes | Yes | Int[][] | Ad slot sizes |
+| traffic | No | String | banner or video (banner by default)
 ### Example
 ```javascript
 {
-    "placementId": "222",
+    "placementId": 222,
     "sizes": [[728, 90], [300, 250]]
+    "traffic": "banner"
+}
+{
+    "placementId": 222,
+    "sizes": [[1366, 768]]
+    "traffic": "video"
 }
 ```

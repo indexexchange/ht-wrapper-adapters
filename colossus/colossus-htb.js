@@ -130,11 +130,27 @@ function ColossusHtb(configs) {
         /* ---------------------- PUT CODE HERE ------------------------------------ */
         var placements = [];
         var len = returnParcels.length;
+        var identityData;
+        var tmp;
         for (var i = 0; i < len; i++) {
-            placements.push({
+            tmp = {
                 placementId: returnParcels[i].xSlotRef.placementId,
-                bidId: returnParcels[i].requestId
-            });
+                sizes: returnParcels[i].xSlotRef.sizes || [],
+                traffic: returnParcels[i].xSlotRef.mediaType || 'banner',
+                bidId: returnParcels[i].requestId,
+                eids: []
+            };
+            identityData = returnParcels[i] && returnParcels[i].identityData;
+            if (identityData) {
+                if (identityData.AdserverOrgIp && identityData.AdserverOrgIp.data) {
+                    tmp.eids.push(identityData.AdserverOrgIp.data);
+                }
+
+                if (identityData.LiveRampIp && identityData.LiveRampIp.data) {
+                    tmp.eids.push(identityData.LiveRampIp.data);
+                }
+            }
+            placements.push(tmp);
         }
         var secure = Browser.getProtocol() === 'https:' ? 1 : 0;
         var queryObj = {
