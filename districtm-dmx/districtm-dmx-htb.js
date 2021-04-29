@@ -12,8 +12,14 @@ var SpaceCamp = require('space-camp.js');
 var System = require('system.js');
 var Network = require('network.js');
 
-// Var ComplianceService;
+// eslint-disable-next-line
+var ComplianceService;
+
+// eslint-disable-next-line
 var RenderService;
+
+// eslint-disable-next-line
+var EventsService;
 
 //? if (DEBUG) {
 var ConfigValidators = require('config-validators.js');
@@ -134,6 +140,7 @@ function DistrictmDmxHtb(configs) {
          */
 
         /* ---------------------- PUT CODE HERE ------------------------------------ */
+        var timeout = SpaceCamp.globalTimeout || 1500;
         var queryObj = {
             cur: ['USD'],
             site: {
@@ -141,9 +148,12 @@ function DistrictmDmxHtb(configs) {
                     id: String(returnParcels[0].xSlotRef.memberid)
                 }
             },
-            tmax: 500,
+            tmax: timeout,
             id: System.generateUniqueId()
         };
+        var gdprPrivacyEnabled = ComplianceService.isPrivacyEnabled();
+        var gdprStatus = ComplianceService.gdpr.getConsent();
+        var ccpaStatus = ComplianceService.usp.getConsent();
         var callbackId = queryObj.id;
 
         /* Change this to your bidder endpoint. */
@@ -169,6 +179,30 @@ function DistrictmDmxHtb(configs) {
 
             return obj;
         });
+        if (gdprPrivacyEnabled) {
+            if (gdprStatus.hasOwnProperty('consentString')) {
+                queryObj.user = {
+                    ext: {
+                        consent: gdprStatus.consentString
+                    }
+                };
+            }
+
+            if (gdprStatus.hasOwnProperty('applies')) {
+                queryObj.regs = {
+                    ext: {
+                        gdpr: gdprStatus.applies ? 1 : 0
+                    }
+                };
+            }
+
+            if (ccpaStatus.hasOwnProperty('uspString')) {
+                queryObj.regs = {};
+                queryObj.regs.ext = {};
+                // eslint-disable-next-line
+                queryObj.regs.ext.us_privacy = ccpaStatus.uspString;
+            }
+        }
 
         queryObj.imp = tags;
 
@@ -204,6 +238,10 @@ function DistrictmDmxHtb(configs) {
         /* ------- Put GDPR consent code here if you are implementing GDPR ---------- */
 
         /* -------------------------------------------------------------------------- */
+        // eslint-disable-next-line
+        var log = console.log;
+        log(queryObj);
+        // eslint-disable-next-line
         return {
             url: baseUrl,
             data: JSON.stringify(queryObj),
@@ -443,7 +481,8 @@ function DistrictmDmxHtb(configs) {
      * ---------------------------------- */
 
     (function __constructor() {
-        // ComplianceService = SpaceCamp.services.ComplianceService;
+        ComplianceService = SpaceCamp.services.ComplianceService;
+        EventsService = SpaceCamp.services.EventsService;
         RenderService = SpaceCamp.services.RenderService;
 
         /* =============================================================================
