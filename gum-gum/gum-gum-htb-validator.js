@@ -68,6 +68,16 @@ function partnerValidator(configs) {
                                         type: 'integer'
                                     }
                                 }
+                            },
+                            iriscat: {
+                                optional: true,
+                                type: 'string',
+                                minLength: 1
+                            },
+                            irisid: {
+                                optional: true,
+                                type: 'string',
+                                minLength: 1
                             }
                         }
                     }

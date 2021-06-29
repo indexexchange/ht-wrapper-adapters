@@ -21,7 +21,9 @@ function getConfig() {
         xSlots: {
             1: {
                 inScreen: 'ggumtest',
-                sizes: [[300, 100]]
+                sizes: [[300, 100], [300, 600]],
+                irisid: 'testIrisID',
+                iriscat: 'testIrisCat'
             }
         }
     };
@@ -38,12 +40,12 @@ function getBidRequestRegex() {
 function validateBidRequest(request) {
     expect(request.query.t).toBe('ggumtest');
     expect(request.query.pi).toBe('2');
+    expect(request.query.bf).toBe('300x100%2C300x600');
+    expect(request.query.irisid).toBe('testIrisID');
+    expect(request.query.iriscat).toBe('testIrisCat');
 }
 
 function getValidResponse(request, creative) {
-    var f = 'b.src=\'//js.%g%.com/%g%.js\',a.parentNode.replaceChild(b,a)})';
-    var i = '<img src="//c.%g%.com/px.gif" onload="(function(a,b){' + f + '(this,document.createElement(\'script\'))">';
-    var e = '<%g%-ad product="2" fromAS=\'AD_JSON\'></%g%-ad>';
     var response = {
         ad: {
             id: '123',
@@ -53,6 +55,9 @@ function getValidResponse(request, creative) {
             markup: creative,
             ii: false,
             price: 2
+        },
+        pag: {
+            pvid: 123
         },
         adhs: {
             id: 30,
@@ -77,7 +82,7 @@ function getValidResponse(request, creative) {
             },
             acp: null
         },
-        cw: (i + e).replace(/%g%/g, 'gumgum')
+        cw: '<img src="//c.gumgum.com/px.gif?1596236973551" onload="(function(a,b){b.src=\'//js.gumgum.com/gumgum.js\',a.parentNode.replaceChild(b,a)})(this,document.createElement(\'script\'))"><gumgum-ad product="3" fromAS="AD_JSON"></gumgum-ad>' // eslint-disable-line max-len
     };
 
     return JSON.stringify(response);

@@ -90,6 +90,9 @@ Norwegian Krone
             "ad": {
                 "markup": "<div>test ad</div>"
             },
+            "pag": {
+                "pvid": 123
+            },
             "adhs": {
                 "id": 33,
                 "adp": {

@@ -313,7 +313,18 @@ function GumGumHtb(configs) {
                 queryObj.pi = 3;
                 queryObj.si = parseInt(xSlot.inSlot, 10);
             }
-            queryObj.sizes = JSON.stringify(xSlot.sizes);
+            if (xSlot.irisid) {
+                queryObj.irisid = xSlot.irisid;
+            }
+            if (xSlot.iriscat) {
+                queryObj.iriscat = xSlot.iriscat;
+            }
+            queryObj.bf = xSlot.sizes.reduce(function (acc, curSlotDim) {
+                // Use the uriencoded version of ,
+                var deliminter = acc ? '%2C' : '';
+
+                return acc + deliminter + Size.arrayToString(curSlotDim);
+            }, '');
         });
         if (pageViewId) {
             queryObj.pv = pageViewId;
@@ -472,10 +483,10 @@ function GumGumHtb(configs) {
             /* Using the above variable, curBid, extract various information about the bid and assign it to
              * these local variables */
 
-            /* The bid price for the given slot
-               GumGum sends bid price as dollars (USD), IX only accepts cents
+            /*
+             * The bid price for the given slot
             */
-            var bidPrice = adConfig.price * 100;
+            var bidPrice = adConfig.price;
 
             /* The size of the given slot */
             var bidSize = [Number(adConfig.width), Number(adConfig.height)];
@@ -590,7 +601,7 @@ function GumGumHtb(configs) {
             partnerId: 'GumGumHtb',
             namespace: 'GumGumHtb',
             statsId: 'GUM',
-            version: '2.2.0',
+            version: '2.3.0',
             targetingType: 'slot',
             enabledAnalytics: {
                 requestTime: true
@@ -611,7 +622,7 @@ function GumGumHtb(configs) {
                 pm: 'ix_gum_cpm',
                 pmid: 'ix_gum_dealid'
             },
-            bidUnitInCents: 1,
+            bidUnitInCents: 100,
             lineItemType: Constants.LineItemTypes.ID_AND_SIZE,
             callbackType: Partner.CallbackTypes.NONE,
             architecture: Partner.Architectures.MRA,
