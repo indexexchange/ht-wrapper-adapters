@@ -48,7 +48,7 @@ To obtain all the tools you will need to develop your adapter, follow these step
 This will install all the dependencies and tools provided by Index Exchange to help with the adapter development process.
 
 # <a name='requirements'></a> Adapter Requirements & Guidelines
-In order for your module to be successfully certified, please refer to the following list of requirements and guidelines. Items under required <b><u>must</b></u> be satisfied in order to pass the certification process. Items under guidelines are recommended for an optimal setup and should be followed if possible.
+In order for your module to be successfully certified, please refer to the following list of requirements and guidelines. Items under required <b><u>must</u></b> be satisfied in order to pass the certification process. Items under guidelines are recommended for an optimal setup and should be followed if possible.
 
 ### General
 
