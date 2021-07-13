@@ -177,6 +177,23 @@ function BRealTimeHtb(configs) {
             /* eslint-enable camelcase */
         }
 
+        // Passing liveramp uids in the user ext field
+        if (returnParcels
+            && returnParcels.length
+            && returnParcels[0].identityData
+            && returnParcels[0].identityData.LiveRampIp
+            && returnParcels[0].identityData.LiveRampIp.data) {
+            if (__emxData.user && __emxData.user.ext) {
+                __emxData.user.ext.eids = returnParcels[0].identityData.LiveRampIp.data;
+            } else {
+                __emxData.user = {
+                    ext: {
+                        eids: returnParcels[0].identityData.LiveRampIp.data
+                    }
+                };
+            }
+        }
+
         /* -------------------------------------------------------------------------- */
 
         return {

@@ -191,6 +191,12 @@ function validateBidRequestWithPrivacy(request) {
     expect(req.user.ext.consent).toBe('TEST_GDPR_CONSENT_STRING');
 }
 
+function validateBidRequestWithTcf2(request) {
+    var req = JSON.parse(request.body);
+    expect(req.regs.ext.gdpr).toBe(1);
+    expect(req.user.ext.consent).toBe('TEST_TCF2_CONSENT_STRING');
+}
+
 function getPassResponse(request) {
     var response = { request: request };
 
@@ -210,5 +216,6 @@ module.exports = {
     getPassResponse: getPassResponse,
     getValidResponseWithDeal: getValidResponseWithDeal,
     validateTargetingWithDeal: validateTargetingWithDeal,
-    validateBidRequestWithPrivacy: validateBidRequestWithPrivacy
+    validateBidRequestWithPrivacy: validateBidRequestWithPrivacy,
+    validateBidRequestWithTcf2: validateBidRequestWithTcf2
 };
