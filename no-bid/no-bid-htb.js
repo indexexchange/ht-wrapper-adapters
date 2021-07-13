@@ -290,6 +290,10 @@ function NoBidHtb(configs) {
                                 unit.sid = configs.siteId;
                             }
 
+                            if (configs.placementId) {
+                                unit.pid = configs.placementId;
+                            }
+
                             // Make sure that sizes are supported
                             if (ixparcel.xSlotRef.sizes && !areSizesSupported(ixparcel.xSlotRef.sizes)) {
                                 continue;

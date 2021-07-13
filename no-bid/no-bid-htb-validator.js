@@ -26,6 +26,10 @@ function partnerValidator(configs) {
             siteId: {
                 type: 'number'
             },
+            placementId: {
+                type: 'number',
+                optional: true
+            },
             xSlots: {
                 type: 'object',
                 properties: {
