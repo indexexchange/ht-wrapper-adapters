@@ -75,7 +75,7 @@ function AppNexusHtb(configs) {
      */
     var __baseUrl;
 
-    var __version = '2.4.0';
+    var __version = '2.4.1';
 
     /* =====================================
      * Functions
@@ -91,7 +91,7 @@ function AppNexusHtb(configs) {
      * @param  {Object[]} returnParcels Array of parcels.
      * @return {Object}                 Request object.
      */
-    function __generateRequestObj(returnParcels) {
+    function __generateRequestObj(returnParcels, optData) {
         //? if (DEBUG){
         var results = Inspector.validate({
             type: 'array',
@@ -171,6 +171,43 @@ function AppNexusHtb(configs) {
                             value: keywordsObj[key]
                         });
                     });
+            }
+
+            /*
+             * Check for a "optData" argument passed to __generateRequestObj();
+             * Push both user and site optional data into the `keywords` key on the `tag`.
+            */
+
+            if (Utilities.isObject(optData)) {
+                if (!Utilities.isEmpty(optData.keyValues.user)) {
+                    var userKeywords = optData.keyValues.user;
+                    if (!tag.hasOwnProperty('keywords')) {
+                        tag.keywords = [];
+                    }
+
+                    Object.keys(userKeywords)
+                        .forEach(function (key) {
+                            tag.keywords.push({
+                                key: key,
+                                value: userKeywords[key]
+                            });
+                        });
+                }
+
+                if (!Utilities.isEmpty(optData.keyValues.site)) {
+                    var siteKeywords = optData.keyValues.site;
+                    if (!tag.hasOwnProperty('keywords')) {
+                        tag.keywords = [];
+                    }
+
+                    Object.keys(siteKeywords)
+                        .forEach(function (key) {
+                            tag.keywords.push({
+                                key: key,
+                                value: siteKeywords[key]
+                            });
+                        });
+                }
             }
 
             queryObj.tags.push(tag);

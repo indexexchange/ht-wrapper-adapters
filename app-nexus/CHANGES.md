@@ -1,3 +1,8 @@
+Version 2.4.1
+=============
+
+- Added support for first party data (optData)
+
 Version 2.4.0
 =============
 
