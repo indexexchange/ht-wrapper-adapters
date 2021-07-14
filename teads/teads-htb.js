@@ -75,6 +75,36 @@ function TeadsHtb(configs) {
         return nav && nav.connection && nav.connection.downlink >= 0 ? nav.connection.downlink.toString() : '';
     }
 
+    function __getTimeToFirstByte(win) {
+        var winPerformance = win.performance || win.webkitPerformance || win.msPerformance || win.mozPerformance;
+
+        var ttfbWithTimingV2 = winPerformance
+            && typeof winPerformance.getEntriesByType === 'function'
+            && Object.prototype.toString.call(winPerformance.getEntriesByType) === '[object Function]'
+            && winPerformance.getEntriesByType('navigation')[0]
+            && winPerformance.getEntriesByType('navigation')[0].responseStart
+            && winPerformance.getEntriesByType('navigation')[0].requestStart
+            && winPerformance.getEntriesByType('navigation')[0].responseStart >= 0
+            && winPerformance.getEntriesByType('navigation')[0].requestStart >= 0
+            && Math.round(
+                winPerformance.getEntriesByType('navigation')[0].responseStart
+                - winPerformance.getEntriesByType('navigation')[0].requestStart
+            );
+
+        if (ttfbWithTimingV2) {
+            return ttfbWithTimingV2.toString();
+        }
+
+        var ttfbWithTimingV1 = winPerformance
+            && winPerformance.timing.responseStart
+            && winPerformance.timing.requestStart
+            && winPerformance.timing.responseStart >= 0
+            && winPerformance.timing.requestStart >= 0
+            && winPerformance.timing.responseStart - winPerformance.timing.requestStart;
+
+        return ttfbWithTimingV1 ? ttfbWithTimingV1.toString() : '';
+    }
+
     /**
      * Generates the request URL and query data to the endpoint for the xSlots
      * in the given returnParcels.
@@ -90,6 +120,7 @@ function TeadsHtb(configs) {
             referrer: Browser.getPageUrl(),
             pageReferrer: Browser.getReferrer(),
             networkBandwidth: __getConnectionDownlink(window.navigator),
+            timeToFirstByte: __getTimeToFirstByte(window),
             // eslint-disable-next-line camelcase
             hb_version: __profile.version
         };
@@ -115,7 +146,8 @@ function TeadsHtb(configs) {
             // eslint-disable-next-line camelcase
             payload.gdpr_iab = {
                 consent: gdprStatus.consentString,
-                status: isCmp ? __findGdprStatus(gdprStatus) : __gdprStatus.CMP_NOT_FOUND_OR_ERROR
+                status: isCmp ? __findGdprStatus(gdprStatus) : __gdprStatus.CMP_NOT_FOUND_OR_ERROR,
+                apiVersion: ComplianceService.gdpr.version
             };
             if (ComplianceService.usp) {
                 var uspStatus = ComplianceService.usp.getConsent();
@@ -200,6 +232,8 @@ function TeadsHtb(configs) {
             /* Explicitly pass */
             var bidIsPass = bidPrice <= 0;
 
+            var dealId = curBid.dealId;
+
             /* OPTIONAL: tracking pixel url to be fired AFTER rendering a winning creative.
             * If firing a tracking pixel is not required or the pixel url is part of the adm,
             * leave empty;
@@ -230,8 +264,14 @@ function TeadsHtb(configs) {
             //? if (FEATURES.GPT_LINE_ITEMS) {
             targetingCpm = __baseClass._bidTransformers.targeting.apply(bidPrice);
             var sizeKey = Size.arrayToString(curReturnParcel.size);
-            curReturnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + targetingCpm];
             curReturnParcel.targeting[__baseClass._configs.targetingKeys.id] = [curReturnParcel.requestId];
+
+            if (dealId) {
+                curReturnParcel.targeting[__baseClass._configs.targetingKeys.pmid] = [sizeKey + '_' + dealId];
+                curReturnParcel.targeting[__baseClass._configs.targetingKeys.pm] = [sizeKey + '_' + targetingCpm];
+            } else {
+                curReturnParcel.targeting[__baseClass._configs.targetingKeys.om] = [sizeKey + '_' + targetingCpm];
+            }
             //? }
 
             //? if (FEATURES.RETURN_CREATIVE) {
@@ -277,7 +317,7 @@ function TeadsHtb(configs) {
             partnerId: 'TeadsHtb',
             namespace: 'TeadsHtb',
             statsId: 'TEADS',
-            version: '2.0.0',
+            version: '2.0.1',
             targetingType: 'slot',
             enabledAnalytics: {
                 requestTime: true

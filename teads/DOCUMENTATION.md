@@ -42,6 +42,7 @@
 | referrer | true | String | page url - Using Browser.getPageUrl() |
 | pageReferrer | true | String | document.referrer - Using Browser.getReferrer() |
 | networkBandwidth | false | String | Effective bandwidth estimate in megabits per second |
+| timeToFirstByte | false | String | Internet connection quality in milliseconds |
 | us_privacy | true | String | CCPA consent string |
 | hb_version | true | String | version of the adapter |
 
@@ -51,6 +52,7 @@
 |---|---|---|
 | status | true | Number |
 | consent | true | String |
+| apiVersion | true | Number |
 
 #### data object
 
@@ -71,6 +73,7 @@
   referrer: "pageUrl",
   pageReferrer: "document.referrer",
   networkBandwidth: "window.navigator.connection.downlink",
+  timeToFirstByte: "Using navigation-timing api V2 by default (https://www.w3.org/TR/navigation-timing-2/) with fallback on navigation-timing api V1 (https://www.w3.org/TR/navigation-timing/) if the browser is not supporting V2 (computation being HTTP response start - HTTP request start in ms)",
   hb_version: "2.0.0",
   gdpr_iab: {
     consent: "consentString",
@@ -101,7 +104,8 @@
          width: "300",
          height: "250",
          ad: "<script>script containing the ad</script>",
-         requestId: "requestId"
+         requestId: "requestId",
+         dealId: "teads_ABC"
       }
     ]
 ```
